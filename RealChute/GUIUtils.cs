@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using RealChute.Extensions;
 using UnityEngine;
 
@@ -28,7 +28,7 @@ namespace RealChute
         /// <summary>
         /// Default toggle labels
         /// </summary>
-        private static readonly string[] toggles = { "True", "False" };
+        private static readonly string[] toggles = { Localization.Get("Common_True"), Localization.Get("Common_False") };
         #endregion
 
         #region Fields

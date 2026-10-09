@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using KSP.UI;
 using KSP.UI.Screens;
@@ -43,7 +43,7 @@ namespace RealChute
 
             //Adds the Parachutes filter to the Filter by Function category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters.Find(f => f.button.categoryName is "Filter by Function");
-            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", "Parachutes", icon, p => p.moduleInfos.Any(m => m.moduleName is "RealChute" or "Parachute"));
+            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", Localization.Get("Editor_Filter_Parachutes"), icon, p => p.moduleInfos.Any(m => m.moduleName is "RealChute" or "Parachute"));
 
             //Sets the buttons in the Filter by Module category
             PartCategorizer.Category filterByModule = PartCategorizer.Instance.filters.Find(f => f.button.categoryName is "Filter by Module");
@@ -96,11 +96,11 @@ namespace RealChute
             if (Instance != this) return;
 
             Debug.Log("[RealChute]: Adding toolbar events");
-            ToolbarControl.RegisterMod(nameof(RealChute), DisplayName: "RealChute Settings", useBlizzy: false, useStock: true, NoneAllowed: false);
+            ToolbarControl.RegisterMod(nameof(RealChute), DisplayName: Localization.Get("Toolbar_Settings"), useBlizzy: false, useStock: true, NoneAllowed: false);
 
             this.controller = this.gameObject.AddComponent<ToolbarControl>();
             this.controller.AddToAllToolbars(Show, Hide, ApplicationLauncher.AppScenes.SPACECENTER, nameof(RealChute), nameof(RCToolbarManager),
-                                             RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, "RealChute Settings");
+                                             RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, Localization.Get("Toolbar_Settings"));
             GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
         }
 

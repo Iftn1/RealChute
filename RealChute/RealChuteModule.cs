@@ -1,4 +1,4 @@
-﻿﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -64,11 +64,11 @@ namespace RealChute
         public bool wait = true, armed, oneWasDeployed;
         [KSPField(isPersistant = true)]
         public bool staged, launched;
-        [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
+        [KSPField(isPersistant = true, guiActive = true, guiName = "#RealChute_Field_SpareChutes")]
         public int chuteCount = 5;
         [KSPField]
         public bool reverseOrientation;
-        [KSPField(guiActive = true, guiName = "Is Safe to Deploy?")]
+        [KSPField(guiActive = true, guiName = "#RealChute_Field_IsSafeToDeploy")]
         public SafeState safeState = SafeState.SAFE;
         #endregion
 
@@ -132,22 +132,22 @@ namespace RealChute
 
         #region Part GUI
         //Deploys the parachutes if possible
-        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Deploy Chute", unfocusedRange = 5)]
+        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "#RealChute_Event_DeployChute", unfocusedRange = 5)]
         public void GUIDeploy() => ActivateRC();
 
         //Cuts main chute chute
-        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Cut main chute", unfocusedRange = 5)]
+        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "#RealChute_Event_CutMainChute", unfocusedRange = 5)]
         public void GUICut() => this.parachutes.Where(p => p.IsDeployed).ForEach(p => p.Cut());
 
         //Arms parachutes
-        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Arm parachute", unfocusedRange = 5)]
+        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "#RealChute_Event_ArmParachute", unfocusedRange = 5)]
         public void GUIArm()
         {
             this.armed = true;
             ActivateRC();
         }
 
-        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Disarm parachute", unfocusedRange = 5)]
+        [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "#RealChute_Event_DisarmParachute", unfocusedRange = 5)]
         public void GUIDisarm()
         {
             this.armed = false;
@@ -159,7 +159,7 @@ namespace RealChute
         }
 
         //Repacks chute from EVA if in space or on the ground
-        [KSPEvent(guiActive = false, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Repack chute", unfocusedRange = 5)]
+        [KSPEvent(guiActive = false, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "#RealChute_Event_RepackChute", unfocusedRange = 5)]
         public void GUIRepack()
         {
             if (this.CanRepack)
@@ -167,7 +167,7 @@ namespace RealChute
                 if (!this.CanRepackCareer)
                 {
                     int level = RealChuteSettings.Instance.EngineerLevel;
-                    string message = level > 0 ? $"Only a level {level} and higher engineer can repack a parachute" : "Only an engineer can repack a parachute";
+                    string message = level > 0 ? Localization.Get("Flight_EngineerLevelRequired", level) : Localization.Get("Flight_EngineerRequired");
                     ScreenMessages.PostScreenMessage(message, 5, ScreenMessageStyle.UPPER_CENTER);
                     return;
                 }
@@ -183,7 +183,7 @@ namespace RealChute
         }
 
         //Shows the info window
-        [KSPEvent(guiActive = true, active = true, guiActiveEditor = true, guiName = "Toggle info")]
+        [KSPEvent(guiActive = true, active = true, guiActiveEditor = true, guiName = "#RealChute_Event_ToggleInfo")]
         public void GUIToggleWindow()
         {
             if (!this.visible)
@@ -205,21 +205,21 @@ namespace RealChute
 
         #region Action groups
         //Deploys the parachutes if possible
-        [KSPAction("Deploy chute")]
+        [KSPAction("#RealChute_Action_DeployChute")]
         public void ActionDeploy(KSPActionParam param) => ActivateRC();
 
         //Cuts main chute
-        [KSPAction("Cut main chute")]
+        [KSPAction("#RealChute_Action_CutMainChute")]
         public void ActionCut(KSPActionParam param)
         {
             if (this.parachutes.Exists(p => p.IsDeployed)) { GUICut(); }
         }
 
         //Arms parachutes
-        [KSPAction("Arm parachute")]
+        [KSPAction("#RealChute_Action_ArmParachute")]
         public void ActionArm(KSPActionParam param) => GUIArm();
 
-        [KSPAction("Disarm parachute")]
+        [KSPAction("#RealChute_Action_DisarmParachute")]
         public void ActionDisarm(KSPActionParam param)
         {
             if (this.armed) { GUIDisarm(); }
@@ -240,7 +240,7 @@ namespace RealChute
                 if (this.vessel.isActiveVessel)
                 {
                     float time = this.timer - (float)this.deploymentTimer.Elapsed.TotalSeconds;
-                    this.screenMessage = time < 60 ? $"Deployment in {time:0.0}s" : $"Deployment in {RCUtils.ToMinutesSeconds(time)}";
+                    this.screenMessage = time < 60 ? Localization.Get("Flight_DeploymentInSeconds", time.ToString("0.0")) : Localization.Get("Flight_DeploymentIn", RCUtils.ToMinutesSeconds(time));
                 }
             }
             else if (this.deploymentTimer.IsRunning) { this.deploymentTimer.Stop(); }
@@ -252,7 +252,7 @@ namespace RealChute
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
                 {
-                    this.screenMessage += $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
+                    this.screenMessage += Localization.Get("Flight_AwaitingNegativeVerticalVelocity", this.vessel.verticalSpeed.ToString("0.0"));
                 }
             }
 
@@ -386,10 +386,10 @@ namespace RealChute
         Callback<Rect> IModuleInfo.GetDrawModulePanelCallback() => null;
 
         //Sets module info title
-        public string GetModuleTitle() => "RealChute";
+        public string GetModuleTitle() => Localization.Get("Module_Title");
 
         //Sets part info field
-        public string GetPrimaryField() => "<b>Parachute count:</b> " + this.parachutes.Count;
+        public string GetPrimaryField() => "<b>" + Localization.Get("Module_ParachuteCount") + "</b> " + this.parachutes.Count;
 
         //Sets up the part for DragCube rendering
         private void SetupForDragCubeRendering(bool on)
@@ -442,11 +442,11 @@ namespace RealChute
                 {
                     if (!this.displayed)
                     {
-                        ScreenMessages.PostScreenMessage("Parachute deployment failed.", 2.5f, ScreenMessageStyle.UPPER_CENTER);
-                        if (this.part.ShieldedFromAirstream) { ScreenMessages.PostScreenMessage("Reason: parachute is in fairings", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
-                        else if (this.GroundStop) { ScreenMessages.PostScreenMessage("Reason: stopped on the ground.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
-                        else if (this.atmPressure == 0d) { ScreenMessages.PostScreenMessage("Reason: in space.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
-                        else { ScreenMessages.PostScreenMessage("Reason: too high.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        ScreenMessages.PostScreenMessage(Localization.Get("Flight_DeploymentFailed"), 2.5f, ScreenMessageStyle.UPPER_CENTER);
+                        if (this.part.ShieldedFromAirstream) { ScreenMessages.PostScreenMessage(Localization.Get("Flight_ReasonFairings"), 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else if (this.GroundStop) { ScreenMessages.PostScreenMessage(Localization.Get("Flight_ReasonGround"), 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else if (this.atmPressure == 0d) { ScreenMessages.PostScreenMessage(Localization.Get("Flight_ReasonSpace"), 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else { ScreenMessages.PostScreenMessage(Localization.Get("Flight_ReasonTooHigh"), 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         this.displayed = true;
                     }
                     if (time < 0.5 || time >= 1d && time < 1.5 || time >= 2d) { this.part.stackIcon.SetIconColor(XKCDColors.Red); }
@@ -589,8 +589,8 @@ namespace RealChute
             if (this.spareChutes < 0) { this.Fields["chuteCount"].guiActive = false; }
             if (!this.SecondaryChute)
             {
-                this.Actions["ActionCut"].guiName = "Cut chute";
-                this.Cut.guiName = "Cut chute";
+                this.Actions["ActionCut"].guiName = "#RealChute_Action_CutChute";
+                this.Cut.guiName = "#RealChute_Action_CutChute";
             }
             this.Actions["ActionArm"].active = !RealChuteSettings.Instance.AutoArm;
 
@@ -649,44 +649,44 @@ namespace RealChute
             this.part.mass = this.caseMass + this.parachutes.Sum(p => p.ChuteMass);
 
             StringBuilder builder = StringBuilderCache.Acquire();
-            builder.AppendFormat("Case mass: {0}\n", this.caseMass);
-            if (this.timer > 0) { builder.AppendFormat("Deployment timer: {0}s\n", this.timer); }
-            if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy: true"); }
-            if (this.deployOnGround) { builder.AppendLine("Deploys on ground contact: true"); }
-            if (this.spareChutes >= 0) { builder.AppendFormat("Spare chutes: {0}\n", this.spareChutes); }
-            builder.AppendFormat("Autocut speed: {0}m/s\n", this.cutSpeed);
+            builder.AppendLine(Localization.Get("Info_CaseMass", this.caseMass));
+            if (this.timer > 0) { builder.AppendLine(Localization.Get("Info_DeploymentTimer", this.timer)); }
+            if (this.mustGoDown) { builder.AppendLine(Localization.Get("Info_MustGoDown")); }
+            if (this.deployOnGround) { builder.AppendLine(Localization.Get("Info_DeploysOnGroundContact")); }
+            if (this.spareChutes >= 0) { builder.AppendLine(Localization.Get("Info_SpareChutes", this.spareChutes)); }
+            builder.AppendLine(Localization.Get("Info_AutocutSpeed", this.cutSpeed));
 
             if (!this.SecondaryChute)
             {
                 Parachute parachute = this.parachutes[0];
-                builder.AppendFormat("Parachute material: {0}\n", parachute.material);
-                builder.AppendFormat("Drag coefficient: {0:0.00}\n", parachute.mat.DragCoefficient);
-                builder.AppendFormat("Material max temperature: {0:0.#}°C\n", parachute.mat.MaxTemp + RCUtils.AbsoluteZero);
-                builder.AppendFormat("Predeployed diameter: {0}m\n", parachute.preDeployedDiameter);
-                builder.AppendFormat("Deployed diameter: {0}m\n", parachute.deployedDiameter);
-                if (!parachute.minIsPressure) { builder.AppendFormat("Minimum deployment altitude: {0}m\n", parachute.minDeployment); }
-                else { builder.AppendFormat("Minimum deployment pressure: {0}atm\n", parachute.minPressure); }
-                builder.AppendFormat("Deployment altitude: {0}m\n", parachute.deploymentAlt);
-                builder.AppendFormat("Predeployment speed: {0}s\n", parachute.preDeploymentSpeed);
-                builder.AppendFormat("Deployment speed: {0}s\n", parachute.deploymentSpeed);
-                if (parachute.cutAlt >= 0) { builder.AppendFormat("Autocut altitude: {0}m", parachute.cutAlt); }
+                builder.AppendLine(Localization.Get("Info_ParachuteMaterial", parachute.material));
+                builder.AppendLine(Localization.Get("Info_DragCoefficient", parachute.mat.DragCoefficient.ToString("0.00")));
+                builder.AppendLine(Localization.Get("Info_MaterialMaxTemperature", (parachute.mat.MaxTemp + RCUtils.AbsoluteZero).ToString("0.#")));
+                builder.AppendLine(Localization.Get("Info_PredeployedDiameter", parachute.preDeployedDiameter));
+                builder.AppendLine(Localization.Get("Info_DeployedDiameter", parachute.deployedDiameter));
+                if (!parachute.minIsPressure) { builder.AppendLine(Localization.Get("Info_MinimumDeploymentAltitude", parachute.minDeployment)); }
+                else { builder.AppendLine(Localization.Get("Info_MinimumDeploymentPressure", parachute.minPressure)); }
+                builder.AppendLine(Localization.Get("Info_DeploymentAltitude", parachute.deploymentAlt));
+                builder.AppendLine(Localization.Get("Info_PredeploymentSpeed", parachute.preDeploymentSpeed));
+                builder.AppendLine(Localization.Get("Info_DeploymentSpeed", parachute.deploymentSpeed));
+                if (parachute.cutAlt >= 0) { builder.Append(Localization.Get("Info_AutocutAltitude", parachute.cutAlt)); }
             }
 
             //In case of more than one chute
             else
             {
-                builder.Append("Parachute materials: ").AppendJoin(this.parachutes.Select(p => p.material), ", ").AppendLine();
-                builder.Append("Drag coefficients: ").AppendJoin(this.parachutes.Select(p => p.mat.DragCoefficient.ToString("0.00")), ", ").AppendLine();
-                builder.Append("Chute max temperatures: ").AppendJoin(this.parachutes.Select(p => (p.mat.MaxTemp + RCUtils.AbsoluteZero).ToString("0.#")), "°C, ").AppendLine("°C");
-                builder.Append("Predeployed diameters: ").AppendJoin(this.parachutes.Select(p => p.preDeployedDiameter.ToString()), "m, ").AppendLine("m");
-                builder.Append("Deployed diameters: ").AppendJoin(this.parachutes.Select(p => p.deployedDiameter.ToString()), "m, ").AppendLine("m");
-                builder.Append("Minimum deployment clauses: ").AppendJoin(this.parachutes.Select(p => p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m"), ", ").AppendLine();
-                builder.Append("Deployment altitudes: ").AppendJoin(this.parachutes.Select(p => p.deploymentAlt.ToString()), "m, ").AppendLine("m");
-                builder.Append("Predeployment speeds: ").AppendJoin(this.parachutes.Select(p => p.preDeploymentSpeed.ToString()), "s, ").AppendLine("s");
-                builder.Append("Deployment speeds: ").AppendJoin(this.parachutes.Select(p => p.deploymentSpeed.ToString()), "s, ").Append("s");
+                builder.Append(Localization.Get("Info_ParachuteMaterials")).AppendJoin(this.parachutes.Select(p => p.material), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_DragCoefficients")).AppendJoin(this.parachutes.Select(p => p.mat.DragCoefficient.ToString("0.00")), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_MaterialMaxTemperatures")).AppendJoin(this.parachutes.Select(p => (p.mat.MaxTemp + RCUtils.AbsoluteZero).ToString("0.#") + "°C"), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_PredeployedDiameters")).AppendJoin(this.parachutes.Select(p => p.preDeployedDiameter.ToString() + "m"), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_DeployedDiameters")).AppendJoin(this.parachutes.Select(p => p.deployedDiameter.ToString() + "m"), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_MinimumDeploymentClauses")).AppendJoin(this.parachutes.Select(p => (p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m").ToString()), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_DeploymentAltitudes")).AppendJoin(this.parachutes.Select(p => p.deploymentAlt.ToString() + "m"), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_PredeploymentSpeeds")).AppendJoin(this.parachutes.Select(p => p.preDeploymentSpeed.ToString() + "s"), ", ").AppendLine();
+                builder.Append(Localization.Get("Info_DeploymentSpeeds")).AppendJoin(this.parachutes.Select(p => p.deploymentSpeed.ToString() + "s"), ", ").Append("s");
                 if (this.parachutes.Exists(p => p.cutAlt != -1))
                 {
-                    builder.Append("\nAutocut altitudes: ").AppendJoin(this.parachutes.Select(p => p.cutAlt == -1 ? "-- " : p.cutAlt + "m"), ", ");
+                    builder.AppendLine().Append(Localization.Get("Info_AutocutAltitudes")).AppendJoin(this.parachutes.Select(p => p.cutAlt == -1 ? "--" : p.cutAlt + "m"), ", ");
                 }
             }
             return builder.ToStringAndRelease();
@@ -714,7 +714,7 @@ namespace RealChute
             if (CompatibilityChecker.IsAllCompatible&& (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && this.visible && !this.hid)
             {
                 GUI.skin = HighLogic.Skin;
-                this.window = ClickThruBlocker.GUILayoutWindow(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
+                this.window = ClickThruBlocker.GUILayoutWindow(this.id, this.window, Window, Localization.Get("Window_Info_Title", RCUtils.AssemblyVersion), GUIUtils.ScaledWindow);
             }
         }
 
@@ -726,24 +726,24 @@ namespace RealChute
             GUILayout.BeginVertical();
 
             //Top info labels
-            StringBuilder builder = StringBuilderCache.Acquire().Append("Part name: ").AppendLine(this.part.partInfo.title);
-            builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
-            builder.Append("Part mass: ").Append(this.part.TotalMass().ToString("0.###")).Append("t");
+            StringBuilder builder = StringBuilderCache.Acquire().Append(Localization.Get("Window_PartName")).AppendLine(this.part.partInfo.title);
+            builder.Append(Localization.Get("Common_SymmetryCounterparts")).AppendLine(this.part.symmetryCounterparts.Count.ToString());
+            builder.Append(Localization.Get("Window_PartMass")).Append(this.part.TotalMass().ToString("0.###")).Append("t");
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.BoldLabel);
 
             //Beginning scroll
             this.scroll = GUILayout.BeginScrollView(this.scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box);
             GUILayout.Space(5f * GameSettings.UI_SCALE);
-            GUILayout.Label("General:", GUIUtils.BoldLabel, GUILayout.Width(120f * GameSettings.UI_SCALE));
+            GUILayout.Label(Localization.Get("Error_General"), GUIUtils.BoldLabel, GUILayout.Width(120f * GameSettings.UI_SCALE));
 
             //General labels
-            builder = StringBuilderCache.Acquire().Append("Autocut speed: ").Append(this.cutSpeed).AppendLine("m/s");
-            if (this.timer >= 60) { builder.Append("Deployment timer: ").AppendLine(RCUtils.ToMinutesSeconds(this.timer)); }
-            else if (this.timer > 0) { builder.Append("Deployment timer: ").Append(this.timer.ToString("0.#")).AppendLine("s"); }
-            if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy"); }
-            if (this.deployOnGround) { builder.AppendLine("Automatically deploys on ground contact"); }
-            if (this.spareChutes >= 0) { builder.Append("Spare chutes: ").Append(this.chuteCount); }
-            else { builder.Append("Spare chutes: inf"); }
+            builder = StringBuilderCache.Acquire().Append(Localization.Get("Window_AutocutSpeed")).Append(this.cutSpeed).AppendLine("m/s");
+            if (this.timer >= 60) { builder.Append(Localization.Get("Editor_DeploymentTimer")).AppendLine(RCUtils.ToMinutesSeconds(this.timer)); }
+            else if (this.timer > 0) { builder.Append(Localization.Get("Editor_DeploymentTimer")).Append(this.timer.ToString("0.#")).AppendLine("s"); }
+            if (this.mustGoDown) { builder.AppendLine(Localization.Get("Window_MustGoDown")); }
+            if (this.deployOnGround) { builder.AppendLine(Localization.Get("Window_DeploysOnGroundContact")); }
+            if (this.spareChutes >= 0) { builder.Append(Localization.Get("Editor_SpareChutes")).Append(this.chuteCount); }
+            else { builder.Append(Localization.Get("Window_SpareChutesInfinite")); }
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
 
             //Specific labels
@@ -761,11 +761,11 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                GUIUtils.CenteredButton("Copy to others chutes", CopyToCounterparts);
+                GUIUtils.CenteredButton(Localization.Get("Window_CopyToOthers"), CopyToCounterparts);
             }
 
             //Close button
-            GUIUtils.CenteredButton("Close", () => this.visible = false);
+            GUIUtils.CenteredButton(Localization.Get("Common_Close"), () => this.visible = false);
 
             //Closer
             GUILayout.EndVertical();

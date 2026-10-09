@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Highlighting;
@@ -97,7 +97,7 @@ namespace RealChute
         #region Part GUI
         private static ProceduralChute editorVisibleChute;
 
-        [KSPEvent(active = true, guiActiveEditor = true, guiName = "Show Parachute Editor")]
+        [KSPEvent(active = true, guiActiveEditor = true, guiName = "#RealChute_Editor_ShowParachuteEditor")]
         public void GUIToggleEditor()
         {
             if (!this.editorGUI.visible)
@@ -124,7 +124,7 @@ namespace RealChute
             }
 
             this.editorGUI.visible = true;
-            this.Events[nameof(GUIToggleEditor)].guiName = "Hide Parachute Editor";
+            this.Events[nameof(GUIToggleEditor)].guiName = "#RealChute_Editor_HideParachuteEditor";
             editorVisibleChute = this;
         }
 
@@ -139,7 +139,7 @@ namespace RealChute
             this.editorGUI.presetSaveVisible = false;
             this.editorGUI.presetWarningVisible = false;
             this.chutes.ForEach(c => c.templateGUI.materialsVisible = false);
-            this.Events[nameof(GUIToggleEditor)].guiName = "Show Parachute Editor";
+            this.Events[nameof(GUIToggleEditor)].guiName = "#RealChute_Editor_ShowParachuteEditor";
             editorVisibleChute = null;
 
             // Disable part highlighting
@@ -177,10 +177,10 @@ namespace RealChute
             if (general)
             {
                 List<string> errors = new List<string>();
-                if (!GUIUtils.TryParseTime(this.timer, out float f) || !GUIUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
-                if (!GUIUtils.TryParseWithEmpty(this.spares, out f) || !GUIUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
-                if (!float.TryParse(this.cutSpeed, out f) || !GUIUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
-                if (!float.TryParse(this.landingAlt, out f) || !GUIUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
+                if (!GUIUtils.TryParseTime(this.timer, out float f) || !GUIUtils.CheckRange(f, 0, 3600)) { errors.Add(Localization.Get("Error_DeploymentTimer")); }
+                if (!GUIUtils.TryParseWithEmpty(this.spares, out f) || !GUIUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add(Localization.Get("Error_SpareChutes")); }
+                if (!float.TryParse(this.cutSpeed, out f) || !GUIUtils.CheckRange(f, 0.01f, 100)) { errors.Add(Localization.Get("Error_AutocutSpeed")); }
+                if (!float.TryParse(this.landingAlt, out f) || !GUIUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add(Localization.Get("Error_LandingAltitude")); }
                 return errors;
             }
             return new List<string>(this.chutes.SelectMany(c => c.templateGUI.Errors));
@@ -189,13 +189,13 @@ namespace RealChute
         //Creates labels for errors.
         internal void CreateErrors()
         {
-            GUILayout.Label("General:");
+            GUILayout.Label(Localization.Get("Error_General"));
             StringBuilder builder = new StringBuilder();
             builder.AppendJoin(GetErrors(true), "\n");
             GUILayout.Label(builder.ToString(), GUIUtils.RedLabel);
             GUILayout.Space(10);
 
-            GUILayout.Label("Chutes:");
+            GUILayout.Label(Localization.Get("Error_Chutes"));
             builder = new StringBuilder();
             builder.AppendJoin(GetErrors(false), "\n");
             GUILayout.Label(builder.ToString(), GUIUtils.RedLabel);
@@ -415,7 +415,7 @@ namespace RealChute
         internal void CreatePreset()
         {
             PresetsLibrary.Instance.AddPreset(new Preset(this));
-            RCUtils.PopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was successfully saved!", "Close");
+            RCUtils.PopupDialog(Localization.Get("Editor_PresetSaved_Title"), Localization.Get("Editor_PresetSaved", this.editorGUI.presetName), Localization.Get("Common_Close"));
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }
 
@@ -593,7 +593,7 @@ namespace RealChute
                     //Identification of the values from the RealChuteModule
                     this.mustGoDown = this.rcModule.mustGoDown;
                     this.deployOnGround = this.rcModule.deployOnGround;
-                    this.timer = this.rcModule.timer + "s";
+                    this.timer = this.rcModule.timer + Localization.Get("Common_SecondsSuffix");
                     this.cutSpeed = this.rcModule.cutSpeed.ToString();
                     if (this.rcModule.spareChutes != -1) { this.spares = this.rcModule.spareChutes.ToString(); }
                     this.originalSize = this.part.transform.GetChild(0).localScale;
@@ -653,7 +653,7 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            return !CompatibilityChecker.IsAllCompatible|| !this.isTweakable || !this.part.Modules.Contains("RealChuteModule") ? string.Empty : "This RealChute part can be tweaked by clicking \"Show Parachute Editor\" in the PAW.";
+            return !CompatibilityChecker.IsAllCompatible|| !this.isTweakable || !this.part.Modules.Contains("RealChuteModule") ? string.Empty : Localization.Get("Editor_PartInfo");
         }
 
         public override void OnSave(ConfigNode node)

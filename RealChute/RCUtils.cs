@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -174,13 +174,13 @@ namespace RealChute
             switch (id)
             {
                 case 0:
-                    return "Main chute";
+                    return Localization.Get("Chute_Main");
 
                 case 1:
-                    return "Secondary chute";
+                    return Localization.Get("Chute_Secondary");
 
                 default:
-                    return "Chute #" + (id + 1);
+                    return Localization.Get("Chute_Numbered", id + 1);
             }
         }
 

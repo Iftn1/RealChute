@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -442,7 +442,7 @@ namespace RealChute
                 this.chuteTemperature + ((this.convectiveFlux - emissiveFlux) * this.InvThermalMass * this.ConvectionArea * TimeWarp.fixedDeltaTime * 0.001));
             if (this.chuteTemperature > this.mat.MaxTemp)
             {
-                ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.Part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
+                ScreenMessages.PostScreenMessage("<color=orange>" + Localization.Get("Flight_ChuteDestroyed", this.Part.partInfo.title) + "</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
                 Cut();
                 return false;
             }
@@ -512,10 +512,10 @@ namespace RealChute
         {
             //Initial label
             StringBuilder builder = StringBuilderCache.Acquire();
-            builder.Append("Material: ").AppendLine(this.mat.Name);
-            builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#"));
-            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###")).AppendLine("m²");
-            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###")).Append("m²");
+            builder.Append(Localization.Get("Chute_Material")).AppendLine(this.mat.Name);
+            builder.Append(Localization.Get("Chute_DragCoefficient")).AppendLine(this.mat.DragCoefficient.ToString("0.00#"));
+            builder.Append(Localization.Get("Chute_PredeployedDiameter", this.preDeployedDiameter)).Append("m\n    ").Append(Localization.Get("Chute_Area")).Append(this.PreDeployedArea.ToString("0.###")).AppendLine("m²");
+            builder.Append(Localization.Get("Chute_DeployedDiameter", this.deployedDiameter)).Append("m\n    ").Append(Localization.Get("Chute_Area")).Append(this.DeployedArea.ToString("0.###")).Append("m²");
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
 
             if (HighLogic.LoadedSceneIsFlight)
@@ -524,28 +524,28 @@ namespace RealChute
                 switch (this.safeState)
                 {
                     case SafeState.SAFE:
-                        GUILayout.Label("Deployment safety: safe", GUIUtils.ScaledLabel); break;
+                        GUILayout.Label(Localization.Get("Chute_Safety_Safe"), GUIUtils.ScaledLabel); break;
 
                     case SafeState.RISKY:
-                        GUILayout.Label("Deployment safety: risky", GUIUtils.YellowLabel); break;
+                        GUILayout.Label(Localization.Get("Chute_Safety_Risky"), GUIUtils.YellowLabel); break;
 
                     case SafeState.DANGEROUS:
-                        GUILayout.Label("Deployment safety: dangerous", GUIUtils.RedLabel); break;
+                        GUILayout.Label(Localization.Get("Chute_Safety_Dangerous"), GUIUtils.RedLabel); break;
                 }
 
                 //Temperature info
                 builder = StringBuilderCache.Acquire();
-                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.AbsoluteZero).AppendLine("°C");
-                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
+                builder.Append(Localization.Get("Chute_MaxTemperature")).Append(Math.Round(this.mat.MaxTemp + RCUtils.AbsoluteZero, 1)).AppendLine("°C");
+                builder.Append(Localization.Get("Chute_CurrentTemperature")).Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
                 GUILayout.Label(builder.ToStringAndRelease(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GUIUtils.RedLabel : GUIUtils.ScaledLabel);
 
 
                 //Pressure/altitude predeployment toggle
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Predeployment:", GUIUtils.ScaledLabel);
-                if (GUILayout.Toggle(!this.minIsPressure, "altitude", GUIUtils.ScaledToggle)) { this.minIsPressure = false; }
+                GUILayout.Label(Localization.Get("Chute_Predeployment"), GUIUtils.ScaledLabel);
+                if (GUILayout.Toggle(!this.minIsPressure, Localization.Get("Chute_Altitude"), GUIUtils.ScaledToggle)) { this.minIsPressure = false; }
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.minIsPressure, "pressure", GUIUtils.ScaledToggle)) { this.minIsPressure = true; }
+                if (GUILayout.Toggle(this.minIsPressure, Localization.Get("Chute_Pressure"), GUIUtils.ScaledToggle)) { this.minIsPressure = true; }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }
@@ -553,7 +553,7 @@ namespace RealChute
             //Predeployment pressure selection
             if (this.minIsPressure)
             {
-                GUILayout.Label($"Predeployment pressure: {this.minPressure}atm", GUIUtils.ScaledLabel);
+                GUILayout.Label(Localization.Get("Chute_PredeploymentPressure", this.minPressure), GUIUtils.ScaledLabel);
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment pressure slider
@@ -571,7 +571,7 @@ namespace RealChute
             //Predeployment altitude selection
             else
             {
-                GUILayout.Label($"Predeployment altitude: {this.minDeployment}m", GUIUtils.ScaledLabel);
+                GUILayout.Label(Localization.Get("Chute_PredeploymentAltitude", this.minDeployment), GUIUtils.ScaledLabel);
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment altitude slider
@@ -587,7 +587,7 @@ namespace RealChute
             }
 
             //Deployment altitude selection
-            GUILayout.Label($"Deployment altitude: {this.deploymentAlt}m", GUIUtils.ScaledLabel);
+            GUILayout.Label(Localization.Get("Chute_DeploymentAltitude", this.deploymentAlt), GUIUtils.ScaledLabel);
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Deployment altitude slider
@@ -599,9 +599,9 @@ namespace RealChute
 
             //Other labels
             builder = StringBuilderCache.Acquire();
-            if (this.cutAlt > 0) { builder.Append("Autocut altitude: ").Append(this.cutAlt).AppendLine("m"); }
-            builder.Append("Predeployment speed: ").Append(this.preDeploymentSpeed).AppendLine("s");
-            builder.Append("Deployment speed: ").Append(this.deploymentSpeed).Append("s");
+            if (this.cutAlt > 0) { builder.Append(Localization.Get("Chute_AutocutAltitude")).Append(this.cutAlt).AppendLine("m"); }
+            builder.Append(Localization.Get("Chute_PredeploymentSpeed")).Append(this.preDeploymentSpeed).AppendLine("s");
+            builder.Append(Localization.Get("Chute_DeploymentSpeed")).Append(this.deploymentSpeed).Append("s");
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
         }
 
@@ -612,7 +612,7 @@ namespace RealChute
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Copy to symmetry counterparts", GUIUtils.ScaledButton, GUILayout.Height(25f * GameSettings.UI_SCALE), GUILayout.Width(250f * GameSettings.UI_SCALE)))
+                if (GUILayout.Button(Localization.Get("Chute_CopyToSymmetry"), GUIUtils.ScaledButton, GUILayout.Height(25f * GameSettings.UI_SCALE), GUILayout.Width(250f * GameSettings.UI_SCALE)))
                 {
                     foreach (Parachute p in this.Parachutes)
                     {
